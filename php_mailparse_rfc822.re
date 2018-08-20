@@ -350,32 +350,31 @@ mailbox:	/* addr-spec / phrase route-addr */
 		;
 
 	/* the stuff from start_tok to i - 1 is the display name part */
-	if (addrs && !in_group && i - start_tok > 0) {
+	if (addrs && !in_group && i > start_tok) {
 		int j, has_comments = 0, has_strings = 0;
-		switch(toks->tokens[i].token) {
-			case ';': case ',': case '<':
+		if (i < toks->ntokens &&
+			(toks->tokens[i].token == ';' || toks->tokens[i].token == ',' || toks->tokens[i].token == '<')) {
+			addrs->addrs[iaddr].name = php_rfc822_recombine_tokens(toks, start_tok, i - start_tok,
+				PHP_RFC822_RECOMBINE_SPACE_ATOMS);
+		} else {
+			/* it's only the display name if there are quoted strings or comments in there */
+			for (j = start_tok; j < i; j++) {
+				if (toks->tokens[j].token == '(')
+					has_comments = 1;
+				if (toks->tokens[j].token == '"')
+					has_strings = 1;
+			}
+			if (has_comments && !has_strings) {
+				addrs->addrs[iaddr].name = php_rfc822_recombine_tokens(toks, start_tok,
+					i - start_tok,
+					PHP_RFC822_RECOMBINE_SPACE_ATOMS | PHP_RFC822_RECOMBINE_COMMENTS_ONLY
+					| PHP_RFC822_RECOMBINE_COMMENTS_TO_QUOTES
+					);
+			} else if (has_strings) {
 				addrs->addrs[iaddr].name = php_rfc822_recombine_tokens(toks, start_tok, i - start_tok,
-						PHP_RFC822_RECOMBINE_SPACE_ATOMS);
-				break;
-			default:
-				/* it's only the display name if there are quoted strings or comments in there */
-				for (j = start_tok; j < i; j++) {
-					if (toks->tokens[j].token == '(')
-						has_comments = 1;
-					if (toks->tokens[j].token == '"')
-						has_strings = 1;
-				}
-				if (has_comments && !has_strings) {
-					addrs->addrs[iaddr].name = php_rfc822_recombine_tokens(toks, start_tok,
-						i - start_tok,
-						PHP_RFC822_RECOMBINE_SPACE_ATOMS | PHP_RFC822_RECOMBINE_COMMENTS_ONLY
-						| PHP_RFC822_RECOMBINE_COMMENTS_TO_QUOTES
-						);
-				} else if (has_strings) {
-					addrs->addrs[iaddr].name = php_rfc822_recombine_tokens(toks, start_tok, i - start_tok,
-						PHP_RFC822_RECOMBINE_SPACE_ATOMS);
+				PHP_RFC822_RECOMBINE_SPACE_ATOMS);
 
-				}
+			}
 
 		}
 
