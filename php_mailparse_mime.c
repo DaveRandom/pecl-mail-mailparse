@@ -125,7 +125,7 @@ static struct php_mimeheader_with_attributes *php_mimeheader_alloc_from_tok(php_
 
 	array_init(&attr->attributes);
 
-/*  php_rfc822_print_tokens(toks); */
+	/* php_rfc822_print_tokens(toks); */
 
 	/* look for optional ; which separates optional attributes from the main value */
 	for (first_semi = 2; first_semi < toks->ntokens; first_semi++)
@@ -139,7 +139,7 @@ static struct php_mimeheader_with_attributes *php_mimeheader_alloc_from_tok(php_
 		first_semi++;
 
 	/* Netscape Bug: Messenger sometimes omits the semi when wrapping the
-     * the header.
+	 * the header.
 	 * That means we have to be even more clever than the spec says that
 	 * we need to :-/
 	 * */
@@ -200,7 +200,7 @@ static struct php_mimeheader_with_attributes *php_mimeheader_alloc_from_tok(php_
 				 */
 				check_name = strchr(name, '*');
 				if (check_name) {
-				  currentencoded = 1;
+					currentencoded = 1;
 
 					/* Is last char * - charset encoding */
 					charset_p = *(name+strlen(name)-1) == '*';
@@ -299,7 +299,7 @@ static struct php_mimeheader_with_attributes *php_mimeheader_alloc_from_tok(php_
 
 static void php_mimepart_free_child(zval *childpart_z)
 {
-      php_mimepart_free((php_mimepart *)zend_fetch_resource(Z_RES_P(childpart_z), php_mailparse_msg_name(), php_mailparse_le_mime_part()));
+	php_mimepart_free((php_mimepart *)zend_fetch_resource(Z_RES_P(childpart_z), php_mailparse_msg_name(), php_mailparse_le_mime_part()));
 }
 
 PHP_MAILPARSE_API php_mimepart *php_mimepart_alloc()
@@ -376,11 +376,11 @@ PHP_MAILPARSE_API char *php_mimepart_attribute_get(struct php_mimeheader_with_at
 	zend_string *hash_key;
 
 	hash_key = zend_string_init(attrname, strlen(attrname), 0);
-        attrval = zend_hash_find(Z_ARRVAL_P(&attr->attributes), hash_key);
+	attrval = zend_hash_find(Z_ARRVAL_P(&attr->attributes), hash_key);
 	zend_string_release(hash_key);
 
 	if (attrval != NULL) {
-	      return Z_STRVAL_P(attrval);
+		return Z_STRVAL_P(attrval);
 	}
 	return NULL;
 }
@@ -438,22 +438,22 @@ static int php_mimepart_process_header(php_mimepart *part)
 			add_assoc_string(&part->headerhash, header_key, newstr);
 			efree(newstr);
 		} else {
-			if((zheaderval = zend_hash_find(Z_ARRVAL_P(&part->headerhash), header_zstring)) != NULL) {
-			      if(Z_TYPE_P(zheaderval) == IS_ARRAY) {
-          add_next_index_string(zheaderval, header_val);
-        } else {
-          /* Create a nested array if there is more than one of the same header */
-          zval zarr;
-          array_init(&zarr);
-          Z_ADDREF_P(zheaderval);
+			if ((zheaderval = zend_hash_find(Z_ARRVAL_P(&part->headerhash), header_zstring)) != NULL) {
+				if (Z_TYPE_P(zheaderval) == IS_ARRAY) {
+					add_next_index_string(zheaderval, header_val);
+				} else {
+					/* Create a nested array if there is more than one of the same header */
+					zval zarr;
+					array_init(&zarr);
+					Z_ADDREF_P(zheaderval);
 
-          add_next_index_zval(&zarr, zheaderval);
-          add_next_index_string(&zarr, header_val);
-          add_assoc_zval(&part->headerhash, header_key, &zarr);
-        }
-      } else {
-        add_assoc_string(&part->headerhash, header_key, header_val);
-      }
+					add_next_index_zval(&zarr, zheaderval);
+					add_next_index_string(&zarr, header_val);
+					add_assoc_zval(&part->headerhash, header_key, &zarr);
+				}
+			} else {
+				add_assoc_string(&part->headerhash, header_key, header_val);
+			}
 		}
 		zend_string_release(header_zstring);
 		/* if it is useful, keep a pointer to it in the mime part */
@@ -520,7 +520,7 @@ static php_mimepart *alloc_new_child_part(php_mimepart *parentpart, size_t start
 		zval_copy_ctor(&child->source.zval);
 	}
 
-        ZVAL_RES(&child_z, child->rsrc);
+	ZVAL_RES(&child_z, child->rsrc);
 	zend_hash_next_index_insert(&parentpart->children, &child_z);
 	child->startpos = child->endpos = child->bodystart = child->bodyend = startpos;
 
@@ -625,12 +625,12 @@ static int php_mimepart_process_line(php_mimepart *workpart)
 
 			php_mimepart_update_positions(workpart, workpart->endpos + origcount, workpart->endpos + linelen, 1);
 
-      if(*c == ' ' || *c == '\t') {
-        /* This doesn't technically confirm to rfc2822, as we're replacing \t with \s, but this seems to fix
-         * cases where clients incorrectly fold by inserting a \t character.
-         */
+			if (*c == ' ' || *c == '\t') {
+				/* This doesn't technically confirm to rfc2822, as we're replacing \t with \s, but this seems to fix
+				 * cases where clients incorrectly fold by inserting a \t character.
+				 */
 				smart_string_appendl(&workpart->parsedata.headerbuf, " ", 1);
-        c++; linelen--;
+				c++; linelen--;
 			} else {
 				php_mimepart_process_header(workpart);
 			}
@@ -765,7 +765,7 @@ static int enum_parts_recurse(php_mimepart_enumerator *top, php_mimepart_enumera
 
 	zend_hash_internal_pointer_reset_ex(&part->children, &pos);
 	while ((childpart_z = zend_hash_get_current_data_ex(&part->children, &pos)) != NULL) {
-	      mailparse_fetch_mimepart_resource(childpart, childpart_z);
+		mailparse_fetch_mimepart_resource(childpart, childpart_z);
 		if (next.id)
 			if (FAILURE == enum_parts_recurse(top, &next.next, childpart, callback, ptr))
 				return FAILURE;

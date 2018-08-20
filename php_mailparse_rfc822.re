@@ -479,10 +479,10 @@ PHP_MAILPARSE_API php_rfc822_addresses_t *php_rfc822_parse_address_tokens(php_rf
 	php_rfc822_addresses_t *addrs = ecalloc(1, sizeof(php_rfc822_addresses_t));
 
 	parse_address_tokens(toks, NULL, &addrs->naddrs);
-    if (addrs->naddrs) {
-        addrs->addrs = ecalloc(addrs->naddrs, sizeof(php_rfc822_address_t));
-        parse_address_tokens(toks, addrs, &addrs->naddrs);
-    }
+	if (addrs->naddrs) {
+		addrs->addrs = ecalloc(addrs->naddrs, sizeof(php_rfc822_address_t));
+		parse_address_tokens(toks, addrs, &addrs->naddrs);
+	}
 
 	return addrs;
 }
@@ -531,7 +531,7 @@ PHP_FUNCTION(mailparse_test)
 
 
 #if 0
-    {
+	{
 	struct rfc822t *t = mailparse_rfc822t_alloc(header, NULL);
 	for (i = 0; i < t->ntokens; i++) {
 		printf("token %d:  token=%d/%c len=%d value=%s\n", i, t->tokens[i].token, t->tokens[i].token,
@@ -541,7 +541,7 @@ PHP_FUNCTION(mailparse_test)
 	mailparse_rfc822t_free(t);
 
 	printf("--- and now:\n");
-    }
+	}
 #endif
 
 	toks = php_mailparse_rfc822_tokenize((const char*)header, 1);
